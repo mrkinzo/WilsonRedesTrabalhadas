@@ -26,7 +26,7 @@ def consumir():
     return mensagem
 
 def escutar_teclado():
-    """Thread que recebe mensagens do ClienteTeclado na porta 9002"""
+   #Thread que recebe mensagens do ClienteTeclado na porta 9002
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(('0.0.0.0', 9002))
         s.listen()
@@ -41,7 +41,7 @@ def escutar_teclado():
                     produzir(mensagem)
 
 def enviar_tela():
-    """Thread que envia mensagens para o ClienteTela na porta 9003"""
+    #Thread que envia mensagens para o ClienteTela na porta 9003
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(('0.0.0.0', 9003))
         s.listen()
@@ -59,16 +59,28 @@ def enviar_tela():
                     sleep(1)
 
 def main():
-    t1 = threading.Thread(target=escutar_teclado, daemon=True)
-    t2 = threading.Thread(target=enviar_tela)
-    
-    t1.start()
-    t2.start()
-    
-    try:
-        t2.join()
-    except KeyboardInterrupt:
-        print("\nServidor encerrado.")
-
+    # Cria e conecta o socket ao servidor — conexão mantida durante toda a sessão
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((HOST, PORT))
+        print("Conectado ao servidor! Digite suas mensagens (ou 'sair' para encerrar):")
+ 
+        while True:
+            mensagem = input("> ")
+ 
+            # Encerra o programa se o usuário digitar 'sair'
+            if mensagem.lower() == 'sair':
+                print("Encerrando...")
+                break
+ 
+            # Ignora linhas em branco
+            if not mensagem.strip():
+                continue
+ 
+            # Envia a mensagem ao servidor pela conexão já aberta
+            s.sendall(mensagem.encode("utf-8"))
+            print(f"✓ Enviado: {mensagem}")
+ 
+ 
 if __name__ == "__main__":
     main()
+ 
